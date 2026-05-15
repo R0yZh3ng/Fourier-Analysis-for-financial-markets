@@ -1,40 +1,33 @@
 import pandas as pd
 import numpy as np
-import datetime
+from datetime import datetime
 import matplotlib.pyplot as plt
 import yfinance as yf
 
-end_date = datetime.datetime.now()
-start_date = end_date - datetime.timedelta(days=365)
+#date time objects instead of strings make the code cleaner
+start_date = datetime(year=2024, month = 1, day = 1)
+end_date = datetime(year=2026, month = 1, day = 1)
 
-ticker = "AAPL"
+ticker = "NVDA"
 
-df = yf.download(ticker, start=start_date, end=end_date)
 
-prices = df["Close"].values.flatten()
+#formatting this way allows for the tickers to be an array input for multiple
+df_NVDA = yf.download(tickers = ticker,
+                      start = start_date,
+                      end = end_date,
+                      interval = "1d",
+                      group_by = "ticker",
+                      auto_adjust = True,  #corrects for stock splits and dividends so price history doesnt include fake jumps
+                      progress = False #this is just a cosmetic progress bar when downloading data
+                      )
 
-# Use log returns instead of raw prices
-returns = np.diff(np.log(prices))
+print(df_NVDA["NVDA"]["Close"]) #NOTE: yfinance uses multiindex colum structure now, so to access the closing prices, need to do this
 
-# FFT
-fft_result = np.fft.fft(returns)
-frequencies = np.fft.fftfreq(len(returns), d=1)
+plt.figure(figsize=(12, 4))
+plt.plot(df_NVDA["NVDA"]["Close"])
+plt.title("NVDA Price history from 2024 - 2026")
+plt.xlabel("Time (day)")
+plt.ylabel("Price")
+plt.savefig("nvda.png")
 
-# Keep only positive frequencies
-positive = frequencies > 0
 
-frequencies = frequencies[positive]
-fft_result = fft_result[positive]
-
-magnitude = np.abs(fft_result)
-periods = 1 / frequencies
-
-# Plot FFT
-plt.figure(figsize=(14, 6))
-plt.plot(periods, magnitude)
-plt.title("FFT Spectrum of AAPL Log Returns")
-plt.xlabel("Period (Days)")
-plt.ylabel("Magnitude")
-plt.xlim(0, 100)
-
-plt.savefig("new.png")
