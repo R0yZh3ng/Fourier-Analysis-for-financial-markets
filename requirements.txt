@@ -1,0 +1,14 @@
+#for handling the time series
+pandas
+
+#for the fft functions
+numpy
+
+#for filtering
+scipy
+
+#stock data
+yfinance
+
+#visuals
+matplotlib
