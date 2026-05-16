@@ -30,4 +30,17 @@ plt.xlabel("Time (day)")
 plt.ylabel("Price")
 plt.savefig("nvda.png")
 
+close_prices = df_NVDA["NVDA"]["Close"]
+transformed_prices = np.fft.fft(close_prices)
+magnitude = np.abs(transformed_prices)
+frequency = np.fft.fftfreq(len(magnitude), d = 1)
 
+#NOTE: we only want the positive frequencies
+positive_mask = frequency > 0 
+
+plt.figure(figsize=(12, 4))
+plt.plot(1/ frequency[positive_mask], magnitude[positive_mask]) #x, y coordinates by index
+plt.title("FFT of NVDA closing prices")
+plt.xlabel("frequency")
+plt.ylabel("magnitude")
+plt.savefig("nvdafft.png")
