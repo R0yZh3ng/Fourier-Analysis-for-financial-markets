@@ -30,17 +30,39 @@ plt.xlabel("Time (day)")
 plt.ylabel("Price")
 plt.savefig("nvda.png")
 
-close_prices = df_NVDA["NVDA"]["Close"]
-transformed_prices = np.fft.fft(close_prices)
+close_prices = df_NVDA["NVDA"]["Close"].values #NOTE: the .values coverts this data to a numpy array
+returns = np.diff(close_prices)
+
+transformed_prices = np.fft.fft(returns)
 magnitude = np.abs(transformed_prices)
 frequency = np.fft.fftfreq(len(magnitude), d = 1)
 
 #NOTE: we only want the positive frequencies
 positive_mask = frequency > 0 
 
+frequency_pos = frequency[positive_mask]
+magnitude_pos = magnitude[positive_mask]
+period = 1 / frequency_pos
+
 plt.figure(figsize=(12, 4))
-plt.plot(1/ frequency[positive_mask], magnitude[positive_mask]) #x, y coordinates by index
+plt.plot(period, magnitude_pos) #x, y coordinates by index
 plt.title("FFT of NVDA closing prices")
-plt.xlabel("frequency")
+plt.xlabel("period(days)")
 plt.ylabel("magnitude")
+plt.xlim(2, 252) # zoom: cycles in 252 days, the number of trading days in a year
 plt.savefig("nvdafft.png")
+
+cutoff = 1/20 # we want cycles longer than 20 days
+filtered = transformed_prices.copy()
+filtered[np.abs(frequency) > cutoff] = 0
+
+reconstructed = np.fft.ifft(filtered)
+reconstructed_prices = np.cumsum(reconstructed.real) + close_prices[0]
+
+plt.figure(figsize=(12,4))
+plt.plot(close_prices[1:], label="Original", alpha=0.5)
+plt.plot(reconstructed_prices, label="Filtered (>20 day cycles)", linewidth=2)
+plt.legend()
+plt.title("NVDA - Original vs Low-Pass Filtered")
+plt.savefig("nvda_filtered.png")
+
