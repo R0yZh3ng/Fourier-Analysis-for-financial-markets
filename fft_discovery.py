@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 import yfinance as yf
+from scipy.io import wavfile
 
 #date time objects instead of strings make the code cleaner
 start_date = datetime(year=2024, month = 1, day = 1)
@@ -66,3 +67,41 @@ plt.legend()
 plt.title("NVDA - Original vs Low-Pass Filtered")
 plt.savefig("nvda_filtered.png")
 
+top_indices = np.argsort(magnitude_pos)[-10:] # get indices sorted by magnitude, takes the last 10 which are the largest 10
+
+#get the actual frequencies and magnitude   
+top_freqs = frequency_pos[top_indices]
+top_mags = magnitude_pos[top_indices]
+
+freq_min = top_freqs.min()
+freq_max = top_freqs.max()
+
+hz_min = 200
+hz_max = 2000
+
+#normalizing the frequency
+top_freqs_hz = (top_freqs - freq_min)/(freq_max - freq_min) * (hz_max - hz_min) + hz_min
+
+print(top_freqs_hz)
+
+sample_rate = 44100
+duration = 10
+t = np.linspace(0, duration, sample_rate * duration)
+
+audio = np.zeros_like(t)
+
+#normalize magnitudes too
+amp_min = top_mags.min()
+amp_max = top_mags.max()
+
+amplitudes = (top_mags - amp_min)/(amp_max - amp_min)
+
+#for each pair, add a sign wave to to audio
+
+for freq_hz, amp in zip (top_freqs_hz, amplitudes):
+    audio += amp * np.sin(2 * np.pi * freq_hz * t)
+
+#noramlzie and save
+audio = audio /np.max(np.abs(audio))
+audio_int = (audio * 32767).astype(np.int16)
+wavfile.write("market_music.wav", sample_rate, audio_int)
