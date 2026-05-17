@@ -12,3 +12,5 @@ stationarity is the statistical property of a stochastic process or tiem series 
 
 -> the ADF test specificially checks whether a time series has a "unit root" - does this series have a drifting mean that never reverts, if it does then its non-stationary, if it doesnt, its stationary.
 
+Dominant cycles in a fourier anaylsis the the peaks with the greatest magnitude or in other words, the highest amplitude peaks in the frequency spectrum
+
