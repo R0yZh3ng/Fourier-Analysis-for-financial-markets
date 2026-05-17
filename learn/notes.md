@@ -14,3 +14,14 @@ stationarity is the statistical property of a stochastic process or tiem series 
 
 Dominant cycles in a fourier anaylsis the the peaks with the greatest magnitude or in other words, the highest amplitude peaks in the frequency spectrum
 
+
+for data saving formats
+
+CSV is large in size, slow read speed, has universal compatibility and doesnt preserve types
+Parquet is small in size, very fast read speed, compatible with python, r , spark, and does preserve types ---- this is the industry standard
+pickle has medium size, fast read speed, compatible with python and perserves types
+JSON is very large in size, slow read speed, universal compatibility and only partially perserves the types
+
+best way to save data would be to use parquet witha csv option in case export to excel
+
+the __main__ name guard is there because python runs all the tip level code when importing a file, the guard prevents main from running automatically if someone imports and that import chain eventually touches main.py, so this is there so that main only runs when you expliclaity execute python main.py

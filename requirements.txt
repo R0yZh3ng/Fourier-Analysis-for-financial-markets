@@ -1,7 +1,9 @@
-#for handling the time series
+#for working with data
 pandas
+pyarrow
+statsmodels
 
-#for the fft functions
+#for the math
 numpy
 
 #for filtering
