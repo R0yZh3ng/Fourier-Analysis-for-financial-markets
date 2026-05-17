@@ -19,14 +19,14 @@ def fetch_ticker(ticker:str) ->pd.DataFrame:
                          interval = "1d",
                          group_by = "ticker",
                          auto_adjust = True,
-                         progress = True)
+                         progress = False)
         df.to_parquet(cache_path)
         return df
 
 
 def make_stationary(prices: np.ndarray, ticker: str) -> np.ndarray:
     """Diff and verify stationarity with ADF"""
-    returns = np.diff(prices)
+    returns = np.diff(np.log(prices)) * 100
     stationarity = adfuller(returns) 
     print(f"{ticker} ADF p-value: {stationarity[1]:.4f} - {'stationary' if stationarity[1] < 0.05 else 'not stationary x'}")
     return returns

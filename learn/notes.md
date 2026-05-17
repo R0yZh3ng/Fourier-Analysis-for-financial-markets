@@ -25,3 +25,7 @@ JSON is very large in size, slow read speed, universal compatibility and only pa
 best way to save data would be to use parquet witha csv option in case export to excel
 
 the __main__ name guard is there because python runs all the tip level code when importing a file, the guard prevents main from running automatically if someone imports and that import chain eventually touches main.py, so this is there so that main only runs when you expliclaity execute python main.py
+
+normalize the returns using log, theyre addicitve across time so that you can sum daily log return to get the total returns over a period, regular percent returns arent additive but rathger multipl;icative
+the multiplying by 100 is just so that the decimal becomes a percentage
+
