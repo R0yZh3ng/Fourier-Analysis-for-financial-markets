@@ -35,3 +35,5 @@ this is called variance reduction, when you average the windows togeter, the ran
 market microstructure noise is the short term cycles that are largely aritficial thythms baked into how market operate, not real economic sugnals, normally these would be filtered out and focus on cycles above 5-10 days
 
 larger windows mean less averaging, so less noise ccnellaation but the peaks get taller due to better frequency resolution, larger windwos can distinguish between frequencies that are close torgther, whats previously smeared concentrats into one sharp peak
+
+power just shows how likely there is a cycle, meaning it does not have direct correlation to the amplitude.

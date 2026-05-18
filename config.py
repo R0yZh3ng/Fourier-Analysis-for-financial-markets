@@ -16,6 +16,7 @@ WINDOW_SIZE = 252   #for welchs
 
 # filtering settings
 LOWPASS_CUTOFF = 20 #filter out cycles less than n days
+BANDWITH = 0.3
 
 # prediction settings
 FORECAST_DAYS = 30  #how far ahead to predict
