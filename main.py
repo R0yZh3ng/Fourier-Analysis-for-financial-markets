@@ -1,5 +1,7 @@
 from src.fetcher import fetch_all
 from src.analysis import analyze_all, extract_cycles
+from src.predictor import predict_all, combine_predictions
+import config
 
 def main():
     data = fetch_all()
@@ -14,7 +16,12 @@ def main():
         print(f"\n{ticker} extracted cycles:")
         for period, signal in results[ticker]["extracted"].items():
             print(f"    {period} day cycle: {len(signal)} points, std = {signal.std():.4f}%")
-        
+
+    predictions = predict_all(results)
+    combined = combine_predictions(predictions)
+    for ticker, forecast in combined.items():
+        direction = "UP" if forecast.mean() > 0 else "DOWN"
+        print(f"{ticker}: next {config.FORECAST_DAYS} days signal -> {direction} (average return = {forecast.mean():.4f}%)")
 
 if __name__ == "__main__":
     main()
