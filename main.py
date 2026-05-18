@@ -1,6 +1,7 @@
-from src.fetcher import fetch_all
+from src.fetcher import fetch_ticker, fetch_all
 from src.analysis import analyze_all, extract_cycles
-from src.predictor import predict_all, combine_predictions
+from src.prediction import predict_all, combine_predictions
+from src.backtest import backtest
 import config
 
 def main():
@@ -23,5 +24,11 @@ def main():
         direction = "UP" if forecast.mean() > 0 else "DOWN"
         print(f"{ticker}: next {config.FORECAST_DAYS} days signal -> {direction} (average return = {forecast.mean():.4f}%)")
 
+
+    for ticker, result in results.items():
+        df = fetch_ticker(ticker)
+        prices = df[ticker]["Close"].values
+        bt = backtest(prices, ticker)
+        print(f"{ticker} backtest: hit rate = {bt['hit_rate']:.1%} over {bt['total_trades']} trades")
 if __name__ == "__main__":
     main()

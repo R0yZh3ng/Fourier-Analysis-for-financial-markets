@@ -20,7 +20,7 @@ BANDWITH = 0.3
 
 # prediction settings
 FORECAST_DAYS = 30  #how far ahead to predict
-BACKTEST_WINDOW = 504  #days in history used in backtesting
+BACKTEST_WINDOW = 252  #days in history used in backtesting
 
 # sonification settings
 AUDIO_DURATION = 200

@@ -37,3 +37,10 @@ market microstructure noise is the short term cycles that are largely aritficial
 larger windows mean less averaging, so less noise ccnellaation but the peaks get taller due to better frequency resolution, larger windwos can distinguish between frequencies that are close torgther, whats previously smeared concentrats into one sharp peak
 
 power just shows how likely there is a cycle, meaning it does not have direct correlation to the amplitude.
+
+hit rate:
+
+50-55 barely better than random and not worth trading
+55-60 decent edge and potentially profitable after costs
+60+ strong edge
+70+ either found smt real or overfitted the data

@@ -6,7 +6,8 @@ import config
 
 def compute_spectrum(returns: np.ndarray) -> tuple:
     """Returns (frequencies, power) using welch's method"""
-    freqs, power = welch(returns, fs=config.SAMPLING_FREQUENCY, nperseg=config.WINDOW_SIZE) #welch does windowing, fft and averge all internally, it also applies the positive mask, fs is one sample a day, nperseg is half a trading year per window
+    nperseg = min(config.WINDOW_SIZE, len(returns))
+    freqs, power = welch(returns, fs=config.SAMPLING_FREQUENCY, nperseg=nperseg) #welch does windowing, fft and averge all internally, it also applies the positive mask, fs is one sample a day, nperseg is half a trading year per window
     return freqs, power
 
 def get_dominant_cycles(freqs, power, n=config.TOP_N_CYCLES) -> pd.DataFrame:

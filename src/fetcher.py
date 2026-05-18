@@ -39,4 +39,3 @@ def fetch_all() -> dict:
         prices = df[ticker]["Close"].values
         result[ticker] = make_stationary(prices, ticker) 
     return result
-        
