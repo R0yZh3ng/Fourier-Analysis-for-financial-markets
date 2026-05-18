@@ -29,3 +29,9 @@ the __main__ name guard is there because python runs all the tip level code when
 normalize the returns using log, theyre addicitve across time so that you can sum daily log return to get the total returns over a period, regular percent returns arent additive but rathger multipl;icative
 the multiplying by 100 is just so that the decimal becomes a percentage
 
+welch's method, instead of one fft on the whoel signal, it splits the data into overlapping windows, ffts each one, and averages the results, this creates much less noise
+this is called variance reduction, when you average the windows togeter, the random noise taht is different in each window canacels out, while the true repeating cycles survive as they show up consistently acorss all windows
+
+market microstructure noise is the short term cycles that are largely aritficial thythms baked into how market operate, not real economic sugnals, normally these would be filtered out and focus on cycles above 5-10 days
+
+larger windows mean less averaging, so less noise ccnellaation but the peaks get taller due to better frequency resolution, larger windwos can distinguish between frequencies that are close torgther, whats previously smeared concentrats into one sharp peak
