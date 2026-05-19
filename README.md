@@ -1,49 +1,171 @@
 # Fourier Market Analysis
 
+A signal processing tool that applies Fourier analysis to financial market data to detect
+cyclical patterns in asset prices and extrapolate them as indicators of future price movement.
+
+---
+
 ## What it does
-This is a tool that analyzes publically tradeable financial assets for any cyclical patterns in its price progression. Upon detection of cycles, it will extrapolate the pattern as a potential indicator of future price movement.
+
+This tool analyzes publicly tradeable financial assets for cyclical patterns in price 
+progression. Upon detection, it extrapolates these patterns as potential indicators of 
+future price movement, validates them through walk-forward backtesting, visualizes the 
+results, and as a little easter egg — turns the market cycles into music.
+
+---
 
 ## Methodology
-After obtaining the historical data of the financial asset, its daily returns are computed from raw closing prices. Then reason for this is to ensure that the data is stationary when 
-applying the fourier analysis, and to verify it's stationarity, we applied the adfuller function to test for the presence of a unit root.
 
-Then we used welch's method to transform our data, which in comparison to directly using the fast fourier transform, it takes windowed segments of the data and averages them out. What this means is that the small frequencies in the data, likely noise, will be mostly canceled out, leaving us with the more significant or likely cyclical patterns.
+**1. Data Pipeline**  
+Historical closing prices are fetched via `yfinance` and cached locally as `.parquet` 
+files to avoid redundant API calls. Daily log returns are computed from raw closing prices 
+to ensure stationarity — a requirement for reliable Fourier analysis. Stationarity is 
+formally verified using the Augmented Dickey-Fuller (ADF) test.
 
-These patterns are then extracted based on power given by welch's method and filtered to leave us with the top 10 most significant cycles; and since we wanted to observe longer/seasonal patterns, we have set a cutoff to be greater than periods of 5 days. These values can all be altered in the config file to be suited for your specific needs. 
+**2. Spectral Analysis**  
+Rather than applying a raw Fast Fourier Transform, we use Welch's method — which splits 
+the signal into overlapping windows, computes the FFT on each, and averages the results. 
+This significantly reduces noise while preserving the dominant cyclical structure. Cycles 
+shorter than 5 trading days are filtered out to focus on meaningful macro patterns rather 
+than microstructure noise.
 
-The extracted cycles are then used to predict future price movements within a prediction window. This is done through fitting a sine wave to the extracted cycle using regression and then extrapolating that fitting function to predict future price movements and the magnitude of their movements. Since we are looking at multiple cycles at once, we sum all the predictions into one combined prediction to adjust for the smaller cycles.
+**3. Cycle Extraction**  
+The top 10 most powerful cycles are extracted from the power spectrum. Each cycle is 
+isolated using a bandpass filter (Butterworth, order 3, zero-phase via `filtfilt`) centered 
+at the cycle's frequency with a configurable bandwidth. All parameters are tunable via 
+`config.py`.
 
-The predictions are then computed for a set window size through years of historical data, then this data is compared to observed price movements in the same time frame, and the prediction accuracies are computed.
+**4. Prediction**  
+A sine wave is fitted to each extracted cycle using nonlinear least squares regression 
+(`scipy.optimize.curve_fit`). The fitted function is extrapolated forward over a 
+configurable forecast window. Individual cycle forecasts are summed — mirroring the 
+inverse Fourier transform — to produce a single combined price prediction.
 
-Lastly the results are visualized using graphs with matplotlib
+**5. Backtesting**  
+A walk-forward backtesting framework validates prediction accuracy across historical data. 
+A sliding window runs the full analysis pipeline at each step, makes a directional 
+prediction, and compares it to the observed price movement. Hit rate is computed over 
+all trades.
+
+**6. Visualization**  
+Results are visualized in a three-panel dashboard per ticker:
+- Power spectrum with dominant cycle markers
+- Top 3 cycles overlaid on historical price
+- Historical price with forecast and confidence interval
+
+---
 
 ## Results
-I chose three tickers in particular for this project, first one being TSLA which is a volatile ticker with high popularity, second is SPY which is an index fund in order to introduce more noise in the data, lastly is MAG which is a collection of the 7 largest tech companies leading the market.
 
-the results for these three tickers are as follows:
+Three tickers were chosen to represent different market personalities:
+- **TSLA** — high volatility, sentiment-driven individual stock
+- **SPY** — S&P 500 index fund, maximum diversification and noise
+- **MAGS** — Magnificent 7 ETF, concentrated mega-cap tech exposure
 
-TSLA: next 30 days signal -> UP (average return = 0.1675%)
-SPY: next 30 days signal -> UP (average return = 0.0034%)
-MAGS: next 30 days signal -> UP (average return = 0.0311%)
+![TSLA Dashboard](output/TSLA_dashboard.png)
+![SPY Dashboard](output/SPY_dashboard.png)
+![MAGS Dashboard](output/MAGS_dashboard.png)
 
-TSLA backtest: hit rate = 60.0% over 220 trades
-We can see that the algorithm indicates decent success rates for TSLA, and on the chart we can observe that there is a very significant cycle which seems to occur per 1/2 of the trading year, which may indicate the financial report cycles.
+| Ticker | Signal | Avg Daily Return | Backtest Hit Rate | Trades |
+|--------|--------|-----------------|-------------------|--------|
+| TSLA   | UP     | +0.1675%        | 60.0%             | 220    |
+| SPY    | UP     | +0.0034%        | 19.5%             | 220    |
+| MAGS   | UP     | +0.0311%        | 74.1%             | 220    |
 
-SPY backtest: hit rate = 19.5% over 220 trades
-the SPY predictions however were very unfavourable, this is likely the result of there being too much noise in large index funds as changes in any sub sector is going to impact the asset as a whole.
+**TSLA (60.0%)** — A strong semi-annual cycle (~126 trading days) was detected, likely 
+corresponding to earnings report cycles. This consistent rhythm gives the model a 
+detectable edge.
 
-MAGS backtest: hit rate = 74.1% over 220 trades
-The MAG backtest seemed to perform extremely well, this may be because of large tech companies following the same cycles in the trading year as they're often in partnerships within the etf, but its more likely that the data was just overfitted given that the complexity of this algorithm does not take into account the many extranous factors of the market.
+**SPY (19.5%)** — Performance worse than random. SPY is the most heavily analyzed 
+instrument in the world — any cyclical patterns are rapidly arbitraged away by algorithmic 
+traders, consistent with the Efficient Market Hypothesis. The model's systematic 
+underperformance on SPY is itself a meaningful result.
 
+**MAGS (74.1%)** — Exceptional hit rate, likely because the Magnificent 7 companies share 
+synchronized cycles driven by correlated macro forces (AI sentiment, Fed rates, earnings 
+calendars). However, overfitting cannot be ruled out given the algorithm does not account 
+for the many extraneous factors of the market. Treat this result with appropriate skepticism.
+
+> **Disclaimer:** This tool is for research and educational purposes only. It is not 
+> financial advice. Past cyclical patterns do not guarantee future performance.
+
+---
 
 ## Installation
 
-just create a virutal enviroment on your machine, use pip to install requirements.txt, and then run main.py from root
+```bash
+git clone https://github.com/yourname/fourier-market-analysis
+cd fourier-market-analysis
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+---
 
 ## Usage
-no clue what this section is
+
+Edit `config.py` to configure your tickers, date range, and analysis parameters:
+
+```python
+TICKERS = ["TSLA", "SPY", "MAGS"]
+START_DATE = "2022-01-01"
+END_DATE   = "2026-01-01"
+FORECAST_DAYS = 30
+MIN_PERIOD    = 5
+TOP_N_CYCLES  = 10
+```
+
+Then run the full pipeline from the project root:
+
+```bash
+python main.py
+```
+
+Outputs are saved to `output/`:
+- `{TICKER}_dashboard.png` — three panel analysis dashboard
+- `{TICKER}_market_music.wav` — sonification audio
+
+---
 
 ## "Can you hear the music?"
 
-a little easter egg inspired by the movie oppenheimer,
-here are the "compositions" created by the cycles i detected in these financial instruments, and to no one's surprise they dont sound like much, if anything the screams of retail traders watching their porfolio go down 80% from one YOLO
+*Inspired by Oppenheimer.*
+
+Every market has a rhythm. This tool maps the dominant cycles detected in each asset 
+directly to audible frequencies using logarithmic scaling — mirroring how human pitch 
+perception works. Cycle power maps to amplitude, so stronger market rhythms play louder.
+
+The result is a unique audio fingerprint for each asset. TSLA's dominant semi-annual 
+cycle produces a deep, slow-moving tone beneath the noise. SPY sounds like static — 
+no cycle dominates, everything cancels. MAGS sits somewhere in between.
+
+The audio files are saved automatically when you run `main.py`. Put on headphones.
+PS they sound like the cries of unfortunate retail traders
+
+---
+
+## Project Structure
+
+fourier-market-analysis/
+├── data/               # cached parquet files
+├── output/             # dashboards and audio
+├── src/
+│   ├── fetcher.py      # data pipeline + stationarity testing
+│   ├── analysis.py     # Welch PSD + cycle extraction + bandpass filtering
+│   ├── predictor.py    # sine fitting + extrapolation + combined forecast
+│   ├── backtester.py   # walk-forward validation
+│   ├── sonification.py # market cycles → audio
+│   └── dashboard.py    # matplotlib visualization
+├── main.py             # entry point
+├── config.py           # all tunable parameters
+└── requirements.txt
+
+---
+
+## Limitations & Future Work
+
+- Cycle stationarity is assumed — real market regimes shift over time
+- Sine wave fitting assumes clean periodicity that financial data rarely exhibits perfectly  
+- No transaction costs or slippage modeled in backtesting
+- Future: rolling window cycle detection, regime change detection, multi-asset correlation analysis
