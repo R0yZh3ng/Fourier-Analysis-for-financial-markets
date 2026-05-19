@@ -148,7 +148,6 @@ PS they sound like the cries of unfortunate retail traders
 ## Project Structure
 
 ```bash
-```
 fourier-market-analysis/
 ├── data/               # cached parquet files
 ├── output/             # dashboards and audio
@@ -163,7 +162,7 @@ fourier-market-analysis/
 ├── config.py           # all tunable parameters
 └── requirements.txt
 ```
-```
+
 ---
 
 ## Limitations & Future Work
