@@ -3,6 +3,7 @@ from src.analysis import analyze_all, extract_cycles
 from src.prediction import predict_all, combine_predictions
 from src.backtest import backtest
 from src.dashboard import generate_report
+from src.sonification import sonify
 import config
 
 def main():
@@ -33,6 +34,7 @@ def main():
         print(f"{ticker} backtest: hit rate = {bt['hit_rate']:.1%} over {bt['total_trades']} trades")
         generate_report(ticker, prices, result, combined[ticker])
         print(f"{ticker} dashboard saved to {config.OUTPUT_DIR}")
+        sonify(ticker, result["cycles_df"])
 
 if __name__ == "__main__":
     main()
