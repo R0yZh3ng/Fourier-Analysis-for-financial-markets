@@ -147,7 +147,7 @@ PS they sound like the cries of unfortunate retail traders
 
 ## Project Structure
 
-```
+```bash
 ```
 fourier-market-analysis/
 ├── data/               # cached parquet files
