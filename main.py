@@ -2,6 +2,7 @@ from src.fetcher import fetch_ticker, fetch_all
 from src.analysis import analyze_all, extract_cycles
 from src.prediction import predict_all, combine_predictions
 from src.backtest import backtest
+from src.dashboard import generate_report
 import config
 
 def main():
@@ -30,5 +31,8 @@ def main():
         prices = df[ticker]["Close"].values
         bt = backtest(prices, ticker)
         print(f"{ticker} backtest: hit rate = {bt['hit_rate']:.1%} over {bt['total_trades']} trades")
+        generate_report(ticker, prices, result, combined[ticker])
+        print(f"{ticker} dashboard saved to {config.OUTPUT_DIR}")
+
 if __name__ == "__main__":
     main()

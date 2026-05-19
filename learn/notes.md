@@ -44,3 +44,6 @@ hit rate:
 55-60 decent edge and potentially profitable after costs
 60+ strong edge
 70+ either found smt real or overfitted the data
+
+efficient market hypothesis
+ if a pattern in a large index fund like spy is detectable and consistently profitable, then funds will trade against it which destroys the pattern.
